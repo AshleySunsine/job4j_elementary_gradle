@@ -59,3 +59,25 @@ tasks.spotbugsMain {
 tasks.test {
     finalizedBy(tasks.spotbugsMain)
 }
+
+tasks.register("checkJarSize") {
+    group = "verification"
+    description = "Check the size of the generated JAR file."
+    dependsOn("build")
+
+    val jarPath = layout.buildDirectory.dir("libs").map { it.file("${project.name}-${project.version}.jar") }.get().asFile.absolutePath
+
+    doLast {
+        val jarFile = File(jarPath)
+        if (jarFile.exists()) {
+            val sizeInMB = jarFile.length() / (1024*1024)
+            if (sizeInMB > 5) {
+                println("WARNING: JAR file exceeds the size limit of 5 MB. Current size: ${sizeInMB} MB")
+            } else {
+                println("JAR file is within the acceptable size limit. Current size: ${sizeInMB} MB")
+            }
+        } else {
+            println("JAR file not found. Please make sure the build process completed successfully.")
+        }
+    }
+}
